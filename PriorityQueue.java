@@ -2,21 +2,21 @@
 /*
  *      Author: Ramzi Doughan
  *      Date:   10/23/2018
- *   
- *      This is a PriorityQueue that is FIFO 
+ *
+ *      This is a PriorityQueue that is FIFO
  *      except when items that are enqueued are of a lower priority,
  *      then those items are put behind items of higher priority
  */
 
 public class PriorityQueue<T extends Comparable<T>> implements PriorityQueueInterface<T>
 {
-    
+
     private Node front;
     private Node rear;
-    
+
     // Default Constructor
     public PriorityQueue() {
-    
+
         // Initialize the front and rear of the Queue
         front = new Node();
         rear = new Node();
@@ -72,14 +72,14 @@ public class PriorityQueue<T extends Comparable<T>> implements PriorityQueueInte
     public T front() {
         return front.prev.item;
     }
-    
+
     /*
     *   isEmpty() returns true if the PriorityQueue is empty
     */
 
     public boolean isEmpty() {
         // return true if the rear is next to the front
-        return (rear.next == front) ? true : false;  
+        return (rear.next == front) ? true : false;
     }
 
     /*
@@ -110,10 +110,10 @@ public class PriorityQueue<T extends Comparable<T>> implements PriorityQueueInte
     }
 
     /*
-    *   Node : A simple Node class with generic item T 
+    *   Node : A simple Node class with generic item T
     *   with pointers to the next and previous nodes in the list
     */
-    
+
     private class Node {
         public T item;
         public Node prev;
