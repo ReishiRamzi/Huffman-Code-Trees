@@ -139,8 +139,21 @@ public class HEncode {
 
 	public void getLeafPtrs()
 	{
-		// make array of nodes, enter nodes into pq
-        return; 
+		// go through the 256 possible characters ( 8 bits, 0-255)
+		for (int i = 0; i < 256; i++) {
+			//if that character occurs once or more
+			if (freq[i] > 0) {
+				// initialize a new node
+				leafPtr[i] = new Node();
+				leafPtr[i].data = (byte) i;
+				leafPtr[i].frequency = freq[i];
+				//System.out.println("freq[" + i + "]" + ": " + freq[i]);
+				//System.out.println("leafPtr[" + i + "]" + ": " + leafPtr[i]);
+				//System.out.println("data[" + i + "]" + ": " + leafPtr[i].data);
+				// enqueue the node on the priority queue
+				pq.enqueue(leafPtr[i]);
+			}
+		}
 	}
 
 	public void showPQ()
@@ -282,8 +295,9 @@ public class HEncode {
 
 		public int compareTo(Node other)
 		{
-            if (other.frequency <= this.frequency) return 0;
-						else return 1;
+			// if the old node is less
+	    if (other.frequency > this.frequency) return 1;
+			else return 0;
 		}
 
 		public String toString()
