@@ -166,11 +166,9 @@ public class HEncode {
 
 	public void buildTree()
 	{
-
 		while (!pq.isEmpty()) {
 			// make a new node
 			Node nNode = new Node();
-			root = nNode;
 			// the left child is the first node out, and its parent is the new node
 			Node leftChild = pq.dequeue();
 			leftChild.parent = nNode;
@@ -179,10 +177,12 @@ public class HEncode {
 			if (pq.front() == null) return;
 			Node rightChild = pq.dequeue();
 			rightChild.parent = nNode;
+			nNode.rchild = rightChild;
 			// assign the frequency for the new node by adding left and right children's frequencies
 			Integer nFreq = leftChild.frequency + rightChild.frequency;
 			nNode.frequency = nFreq;
-			nNode.rchild = rightChild;
+			root = nNode;
+
 			// throw the new node back in the priority queue
 			pq.enqueue(nNode);
 
@@ -197,7 +197,10 @@ public class HEncode {
 
 	public void encodeFile()
 	{
-		return; // Stub
+		bitw = new BitWriter(inputFilename + ".huf");
+		bitw.writeInt(root.frequency);
+
+		bitw.close();
 	}
 
 
