@@ -4,6 +4,7 @@
 
 import java.io.*;
 
+
 public class HEncode {
 
 	private Node root = null;               // Root of the Huffman Code Tree.
@@ -147,9 +148,6 @@ public class HEncode {
 				leafPtr[i] = new Node();
 				leafPtr[i].data = (byte) i;
 				leafPtr[i].frequency = freq[i];
-				//System.out.println("freq[" + i + "]" + ": " + freq[i]);
-				//System.out.println("leafPtr[" + i + "]" + ": " + leafPtr[i]);
-				//System.out.println("data[" + i + "]" + ": " + leafPtr[i].data);
 				// enqueue the node on the priority queue
 				pq.enqueue(leafPtr[i]);
 			}
@@ -168,8 +166,41 @@ public class HEncode {
 
 	public void buildTree()
 	{
-		return;  // Stub
+		// make a new node that has left child and right child of first 2 in priority Queue
+		// assign it a frequency of the addition of left and right children
+		// throw it back in the Priority queue
+		// while there is another item left
+
+		while (!pq.isEmpty()) {
+			// make a new node
+			Node nNode = new Node();
+			root = nNode;
+			// the left child is the first node out, and its parent is the new node
+			Node leftChild = pq.dequeue();
+			leftChild.parent = nNode;
+			nNode.lchild = leftChild;
+			//again for right child, if there's another node in PQ - peek the front
+			if (pq.front() == null) return;
+			Node rightChild = pq.dequeue();
+			rightChild.parent = nNode;
+			// assign the frequency for the new node by adding left and right children's frequencies
+			Integer nFreq = leftChild.frequency + rightChild.frequency;
+			nNode.frequency = nFreq;
+			nNode.rchild = rightChild;
+			// throw the new node back in the priority queue
+			pq.enqueue(nNode);
+			// DEBUG print the queue and the tree as it is building
+			showPQ();
+			printTree();
+
+		}
+
 	}
+
+	/*
+	*		encodeFile() -
+	*
+	*/
 
 	public void encodeFile()
 	{
