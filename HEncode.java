@@ -189,9 +189,6 @@ public class HEncode {
 			nNode.rchild = rightChild;
 			// throw the new node back in the priority queue
 			pq.enqueue(nNode);
-			// DEBUG print the queue and the tree as it is building
-			showPQ();
-			printTree();
 
 		}
 
