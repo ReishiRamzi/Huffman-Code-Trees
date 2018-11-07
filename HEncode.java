@@ -166,10 +166,6 @@ public class HEncode {
 
 	public void buildTree()
 	{
-		// make a new node that has left child and right child of first 2 in priority Queue
-		// assign it a frequency of the addition of left and right children
-		// throw it back in the Priority queue
-		// while there is another item left
 
 		while (!pq.isEmpty()) {
 			// make a new node
