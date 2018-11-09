@@ -191,15 +191,27 @@ public class HEncode {
 	}
 
 	/*
-	*		encodeFile() -
+	*		encodeFile() - compresses the file -
+	*		start with 32 bits for the number of characters
+	*		encode/compress the bytes by writing their tree traversal to root
+	*		and the corresponding bytes(leafs) the tree routes represent
 	*
 	*/
 
 	public void encodeFile()
 	{
 		bitw = new BitWriter(inputFilename + ".huf");
+		// write the number of characters in the file
 		bitw.writeInt(root.frequency);
-
+		// encode bytes
+		for (int i = 0; i < 256; i++) {
+			if (leafPtr[i] != null) {
+				writeCode((byte)i);
+			}
+		}
+		// write the tree to the file for decoding
+		writeTree(root);
+		// close and pad
 		bitw.close();
 	}
 
