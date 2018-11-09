@@ -203,14 +203,10 @@ public class HEncode {
 		bitw = new BitWriter(inputFilename + ".huf");
 		// write the number of characters in the file
 		bitw.writeInt(root.frequency);
-		// encode bytes
-		for (int i = 0; i < 256; i++) {
-			if (leafPtr[i] != null) {
-				writeCode((byte)i);
-			}
-		}
 		// write the tree to the file for decoding
 		writeTree(root);
+		// encode bytes
+		writeCode((byte)i);
 		// close and pad
 		bitw.close();
 	}
@@ -228,26 +224,7 @@ public class HEncode {
 
 	public void writeCode(byte b)
 	{
-		Node currentNode = leafPtr[b];
-		// use parents to travel up the tree
-		while(currentNode != root) {
-			System.out.println("traveled up: " + currentNode.frequency + " char: " + currentNode.data);
-			
-			// push 0 onto stack if left child
-			if (currentNode.parent.lchild == currentNode) {
-				stk.push(0);
-			}
-			// push 1 onto stack if right child
-			if (currentNode.parent.rchild == currentNode) {
-				stk.push(1);
-			}
-			currentNode = currentNode.parent;
-		}
-		// once at root clear stack and write bits
-		while (!stk.isEmpty()) {
-			System.out.println("bit: " + stk.top());
-			bitw.writeBit(stk.pop());
-		}
+		return; // stub
 	}
 
 
@@ -261,7 +238,30 @@ public class HEncode {
 
 	public void writeTree(Node root)
 	{
-		return;
+		for (int i = 0; i < 256; i++) {
+			if (leafPtr[i] != null) {
+				Node currentNode = leafPtr[i];
+				// use parents to travel up the tree
+				while(currentNode != root) {
+					System.out.println("traveled up: " + currentNode.frequency + " char: " + currentNode.data);
+					
+					// push 0 onto stack if left child
+					if (currentNode.parent.lchild == currentNode) {
+						stk.push(0);
+					}
+					// push 1 onto stack if right child
+					if (currentNode.parent.rchild == currentNode) {
+						stk.push(1);
+					}
+					currentNode = currentNode.parent;
+				}
+				// once at root clear stack and write bits
+				while (!stk.isEmpty()) {
+					System.out.println("bit: " + stk.top());
+					bitw.writeBit(stk.pop());
+				}
+			}
+		}
 	}
 
 
