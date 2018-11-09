@@ -166,15 +166,9 @@ public class HEncode {
 
 	public void buildTree()
 	{
-		// make a new node that has left child and right child of first 2 in priority Queue
-		// assign it a frequency of the addition of left and right children
-		// throw it back in the Priority queue
-		// while there is another item left
-
 		while (!pq.isEmpty()) {
 			// make a new node
 			Node nNode = new Node();
-			root = nNode;
 			// the left child is the first node out, and its parent is the new node
 			Node leftChild = pq.dequeue();
 			leftChild.parent = nNode;
@@ -183,10 +177,12 @@ public class HEncode {
 			if (pq.front() == null) return;
 			Node rightChild = pq.dequeue();
 			rightChild.parent = nNode;
+			nNode.rchild = rightChild;
 			// assign the frequency for the new node by adding left and right children's frequencies
 			Integer nFreq = leftChild.frequency + rightChild.frequency;
 			nNode.frequency = nFreq;
-			nNode.rchild = rightChild;
+			root = nNode;
+
 			// throw the new node back in the priority queue
 			pq.enqueue(nNode);
 
@@ -195,13 +191,28 @@ public class HEncode {
 	}
 
 	/*
-	*		encodeFile() -
+	*		encodeFile() - compresses the file -
+	*		start with 32 bits for the number of characters
+	*		encode/compress the bytes by writing their tree traversal to root
+	*		and the corresponding bytes(leafs) the tree routes represent
 	*
 	*/
 
 	public void encodeFile()
 	{
-		return; // Stub
+		bitw = new BitWriter(inputFilename + ".huf");
+		// write the number of characters in the file
+		bitw.writeInt(root.frequency);
+		// encode bytes
+		for (int i = 0; i < 256; i++) {
+			if (leafPtr[i] != null) {
+				writeCode((byte)i);
+			}
+		}
+		// write the tree to the file for decoding
+		writeTree(root);
+		// close and pad
+		bitw.close();
 	}
 
 
