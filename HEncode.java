@@ -228,6 +228,10 @@ public class HEncode {
 
 	public void writeCode(byte b)
 	{
+		// use parents to travel up the tree
+		// push 0 onto stack if left child
+		// push 1 onto stack if right child
+		// once at root clear stack and write bits
 		return;
 	}
 
