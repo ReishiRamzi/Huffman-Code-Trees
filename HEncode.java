@@ -228,11 +228,26 @@ public class HEncode {
 
 	public void writeCode(byte b)
 	{
+		Node currentNode = leafPtr[b];
 		// use parents to travel up the tree
-		// push 0 onto stack if left child
-		// push 1 onto stack if right child
+		while(currentNode != root) {
+			System.out.println("traveled up: " + currentNode.frequency + " char: " + currentNode.data);
+			
+			// push 0 onto stack if left child
+			if (currentNode.parent.lchild == currentNode) {
+				stk.push(0);
+			}
+			// push 1 onto stack if right child
+			if (currentNode.parent.rchild == currentNode) {
+				stk.push(1);
+			}
+			currentNode = currentNode.parent;
+		}
 		// once at root clear stack and write bits
-		return;
+		while (!stk.isEmpty()) {
+			System.out.println("bit: " + stk.top());
+			bitw.writeBit(stk.pop());
+		}
 	}
 
 
