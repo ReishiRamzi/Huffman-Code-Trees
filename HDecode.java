@@ -3,8 +3,7 @@
  */
 
 import java.io.*;
-
-import org.graalvm.compiler.api.replacements.Snippet.NonNullParameter;
+import java.nio.file.Files;
 
 public class HDecode {
 	
@@ -22,9 +21,6 @@ public class HDecode {
 	{
 		HDecode decoder = new HDecode(args[0]);  // Construct a Huffman Decoder
 		
-		// reconstruct the tree
-		decoder.readTree();
-
 		// decode the contents
 		decoder.decode();
 	}
@@ -39,6 +35,7 @@ public class HDecode {
 	public HDecode(String inputFilename)
 	{
 		this.inputFilename = inputFilename;
+	
 	}
 	
 	/*
@@ -49,65 +46,135 @@ public class HDecode {
 	
 	public void decode()
 	{
-			// construct our bit reader and output file
-			bitr = new BitReader(inputFilename);
+
+		try {
 			outF = new FileOutputStream(inputFilename + ".orig");
 			// read the first 4 bytes to get the file size
+
+			// construct our bit reader and output file
+			bitr = new BitReader(inputFilename);
 			fileSize = bitr.readInt();
+			System.out.println(fileSize);
+			root = readTree(bitr);	
+			printTree();
+
 			// declare a new node
-			Node currentNode;
-			// read bits from the compressed file
-			for (int i = 0; i < fileSize; i++) {
-				// start at the root
-				currentNode = root;
-				// no children means leaf has been reached
-				while (currentNode.lchild != null && currentNode.rchild != null) {
+			Node currentNode = new Node();
+			
+			boolean isleaf;
+
+				for (int i = 0; i < fileSize; i++) {
+					// read bits from the compressed file
+					
+					// start at the root
+					currentNode = root;
+					isleaf = false;
+					// no children means leaf has been reached
 					// use them to descend code tree until leaf is reached
-					byte bit = bitr.readBit();
-					// if it's a 0, move left	
-					if (bit == 0) {
-						currentNode = currentNode.lchild;
+					while ( !isleaf ) {
+						int bit = bitr.readBit();
+						if (bit == -1) return;
+						System.out.println("bit:  " + bit + "\n");
+
+						// if it's a 0, move left	
+						if (bit == 0) {
+							currentNode = currentNode.lchild;
+						}
+						// if a 1, move right
+						else if (bit == 1)
+						{
+							currentNode = currentNode.rchild;
+						}
+						if (currentNode.lchild == null && currentNode.rchild == null)
+						{
+						
+						isleaf = true;
+						// once at the leaf, write data value in the leaf to output file
+						// to recreate the original file					
+						outF.write(currentNode.data);
+						System.out.println("current node data: " + currentNode.data);	
+						}
+						//bit = bitr.readBit();	
 					}
-					// if a 1, move right
-					else if (bit == 1)
-					{
-						currentNode = currentNode.rchild;
-					}
+
 				}
-				// once at the leaf, write data value in the leaf to output file
-				// to recreate the original file					
-				outF.write(bitr.readByte());
-			}
+			
 			// close the files
 			bitr.close();
 			outF.close();
+		}
+		catch (FileNotFoundException e) {
+			System.out.printf("Error opening file %s\n", inputFilename);
+			System.exit(0);
+		}
+		catch (IOException e) { 
+			System.out.printf("IOException reading from: %s\n", inputFilename);
+			System.exit(0);
+		}
+	
 	}
 	
 	/*
 	*	readTree() - reads the code tree from the file
-	*	uses the bit reader to construct and return the tree
+	*	uses the bit reader to construct and return the root of the tree
 	*/
 
-	public Node readTree(Node node)
+	public Node readTree(BitReader bitr)
 	{
-		
-		if (bitr.readBit() == 0)
-		{
-			byte nextByte = bitr.nextByte();
-			Node nNode = new Node(nextByte);
+		int bit = bitr.readBit();
+		if (bit == 0)
+		{			
+			Node nNode = new Node();
+			byte nextByte = (byte) bitr.readByte(); 
+			nNode.data = nextByte;
 			return nNode;
 		}
 		else 
 		{
-			Node n = new Node();
-			n.lchild = readTree(n.lchild);
-			n.rchild = readTree(n.rchild);
-			n.lchild.parent = n;
-			n.rchild.parent = n;
-			return n;
+			Node lTree = readTree(bitr);
+			Node rTree = readTree(bitr);
+			Node nNode = new Node();
+			nNode.lchild = lTree;
+			nNode.rchild = rTree;
+			lTree.parent = nNode;
+			rTree.parent = nNode;
+			return nNode;
 		}
 	}
 	
+		/*
+	 *   printTree() - Print the Huffman Code Tree to
+	 *                 standard output.
+	 */
+
+
+	public void printTree()
+	{
+		rPrintTree(root,0);
+	}
+
+	/*
+	 *    rPrintTree() - the usual quick recursive method to print a tree.
+	 */
+
+	public void rPrintTree(Node r, int level)
+	{
+
+		if (r == null)          // Empty tree.
+			return;
+
+		rPrintTree(r.rchild, level + 1);   // Print the right subtree.
+
+		for (int i = 0; i < level; i++)
+			System.out.print("         ");
+
+		if (r.data > (byte) 31)
+			System.out.printf("%c-%d\n", (char) r.data, r.frequency);
+		else
+			System.out.printf("%c-%d\n", '*', r.frequency);
+
+		rPrintTree(r.lchild, level + 1);
+	}
 	
 	public class Node implements Comparable<Node>
 	{

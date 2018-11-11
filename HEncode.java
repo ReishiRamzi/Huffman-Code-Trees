@@ -212,7 +212,7 @@ public class HEncode {
 		    inF = new FileInputStream(inputFilename);  // Open the input file.
 
 		    do {
-		    	nextByte = inF.read();    // Read the next byte (-1 on EOF)
+		    	nextByte = (byte) inF.read();    // Read the next byte (-1 on EOF)
 		    	if (nextByte != -1)       //
 		    		writeCode(nextByte);     //    write the byte to file
 		    } while (nextByte != -1);     //    for the byte.
