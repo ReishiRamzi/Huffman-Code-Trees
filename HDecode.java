@@ -49,7 +49,38 @@ public class HDecode {
 	
 	public void decode()
 	{
-		return; // stub
+			// construct our bit reader and output file
+			bitr = new BitReader(inputFilename);
+			outF = new FileOutputStream(inputFilename + ".orig");
+			// read the first 4 bytes to get the file size
+			fileSize = bitr.readInt();
+			// declare a new node
+			Node currentNode;
+			// read bits from the compressed file
+			for (int i = 0; i < fileSize; i++) {
+				// start at the root
+				currentNode = root;
+				// no children means leaf has been reached
+				while (currentNode.lchild != null && currentNode.rchild != null) {
+					// use them to descend code tree until leaf is reached
+					byte bit = bitr.readBit();
+					// if it's a 0, move left	
+					if (bit == 0) {
+						currentNode = currentNode.lchild;
+					}
+					// if a 1, move right
+					else if (bit == 1)
+					{
+						currentNode = currentNode.rchild;
+					}
+				}
+				// once at the leaf, write data value in the leaf to output file
+				// to recreate the original file					
+				outF.write(bitr.readByte());
+			}
+			// close the files
+			bitr.close();
+			outF.close();
 	}
 	
 	/*
