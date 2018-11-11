@@ -1,6 +1,8 @@
 *.class
-test.dat.huf
-
 test\.txt
-
+test\.dat
+test\.dat\.huf
 test\.dat\.huf\.orig
+*.huf
+
+*.dat
