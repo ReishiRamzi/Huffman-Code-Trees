@@ -201,7 +201,7 @@ public class HEncode {
 	public void encodeFile()
 	{
 		FileInputStream inF;   // File object to read from.
-		int nextByte;          // Next byte from the file.
+		byte nextByte;          // Next byte from the file.
 		bitw = new BitWriter(inputFilename + ".huf");
 		// write the number of characters in the file
 		bitw.writeInt(root.frequency);
@@ -214,9 +214,8 @@ public class HEncode {
 		    do {
 		    	nextByte = inF.read();    // Read the next byte (-1 on EOF)
 		    	if (nextByte != -1)       //
-		    		writeCode((byte)nextByte);;     //    write the byte to file
+		    		writeCode(nextByte);     //    write the byte to file
 		    } while (nextByte != -1);     //    for the byte.
-
 		    inF.close();                  //  Close the file.
 		}
 		catch (FileNotFoundException e) {

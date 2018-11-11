@@ -4,6 +4,8 @@
 
 import java.io.*;
 
+import org.graalvm.compiler.api.replacements.Snippet.NonNullParameter;
+
 public class HDecode {
 	
 	private Node root = null;      // Root of the Huffman Code Tree.
@@ -18,38 +20,93 @@ public class HDecode {
 	public static void main(String[] args)
 			throws FileNotFoundException, IOException
 	{
-	
 		HDecode decoder = new HDecode(args[0]);  // Construct a Huffman Decoder
+		
+		// reconstruct the tree
+		decoder.readTree();
+
+		// decode the contents
+		decoder.decode();
 	}
-	
+
+	/* 
+	*	HDecode() - Takes an input file and decodes the file,
+	*	using the number of characters (bytes 1 - 4), 
+	*	the code tree starting on the 5th byte,
+	*	and the compressed file contents afterwards
+	*/
+
 	public HDecode(String inputFilename)
 	{
-		return; // stub
+		this.inputFilename = inputFilename;
 	}
 	
+	/*
+	*	decode() - reads the compressed file
+	*	reconstructs the tree and reads the encoded bits 
+	*	to reconstruct the original file
+	*/
 	
 	public void decode()
 	{
-		return; // stub
+			// construct our bit reader and output file
+			bitr = new BitReader(inputFilename);
+			outF = new FileOutputStream(inputFilename + ".orig");
+			// read the first 4 bytes to get the file size
+			fileSize = bitr.readInt();
+			// declare a new node
+			Node currentNode;
+			// read bits from the compressed file
+			for (int i = 0; i < fileSize; i++) {
+				// start at the root
+				currentNode = root;
+				// no children means leaf has been reached
+				while (currentNode.lchild != null && currentNode.rchild != null) {
+					// use them to descend code tree until leaf is reached
+					byte bit = bitr.readBit();
+					// if it's a 0, move left	
+					if (bit == 0) {
+						currentNode = currentNode.lchild;
+					}
+					// if a 1, move right
+					else if (bit == 1)
+					{
+						currentNode = currentNode.rchild;
+					}
+				}
+				// once at the leaf, write data value in the leaf to output file
+				// to recreate the original file					
+				outF.write(bitr.readByte());
+			}
+			// close the files
+			bitr.close();
+			outF.close();
 	}
 	
-	
-	public Node readTree()
+	/*
+	*	readTree() - reads the code tree from the file
+	*	uses the bit reader to construct and return the tree
+	*/
+
+	public Node readTree(Node node)
 	{
-		return null; // stub
-	}
 		
-	
-	
-	
-
-	
-
-			
-	
-	
-	
-
+		if (bitr.readBit() == 0)
+		{
+			byte nextByte = bitr.nextByte();
+			Node nNode = new Node(nextByte);
+			return nNode;
+		}
+		else 
+		{
+			Node n = new Node();
+			n.lchild = readTree(n.lchild);
+			n.rchild = readTree(n.rchild);
+			n.lchild.parent = n;
+			n.rchild.parent = n;
+			return n;
+		}
+	}
 	
 	
 	public class Node implements Comparable<Node>
@@ -99,7 +156,9 @@ public class HDecode {
 		
 		public int compareTo(Node other)
 		{
-            return 0; // stub
+			// if the old node is less
+			if (other.frequency > this.frequency) return 1;
+			else return 0;
 		}
 		
 		public String toString()
