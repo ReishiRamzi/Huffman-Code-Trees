@@ -18,12 +18,14 @@ public class HDecode {
 	public static void main(String[] args)
 			throws FileNotFoundException, IOException
 	{
-	
 		HDecode decoder = new HDecode(args[0]);  // Construct a Huffman Decoder
+		
+		// reconstruct the tree
+		decoder.readTree();
+
+		// decode the contents
+		decoder.decode();
 	}
-	
-	/*
-	*/
 
 	/* 
 	*	HDecode() - Takes an input file and decodes the file,
@@ -35,7 +37,6 @@ public class HDecode {
 	public HDecode(String inputFilename)
 	{
 		this.inputFilename = inputFilename;
-		
 	}
 	
 	/*
@@ -46,8 +47,7 @@ public class HDecode {
 	
 	public void decode()
 	{
-		return;// stub
-		
+		return; // stub
 	}
 	
 	/*
@@ -57,7 +57,6 @@ public class HDecode {
 
 	public Node readTree()
 	{
-		
 		return root; // stub
 	}
 	
@@ -109,7 +108,9 @@ public class HDecode {
 		
 		public int compareTo(Node other)
 		{
-            return 0; // stub
+			// if the old node is less
+			if (other.frequency > this.frequency) return 1;
+			else return 0;
 		}
 		
 		public String toString()
