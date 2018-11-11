@@ -22,34 +22,44 @@ public class HDecode {
 		HDecode decoder = new HDecode(args[0]);  // Construct a Huffman Decoder
 	}
 	
+	/*
+	*/
+
+	/* 
+	*	HDecode() - Takes an input file and decodes the file,
+	*	using the number of characters (bytes 1 - 4), 
+	*	the code tree starting on the 5th byte,
+	*	and the compressed file contents afterwards
+	*/
+
 	public HDecode(String inputFilename)
 	{
-		return; // stub
+		this.inputFilename = inputFilename;
+		
 	}
 	
+	/*
+	*	decode() - reads the compressed file
+	*	reconstructs the tree and reads the encoded bits 
+	*	to reconstruct the original file
+	*/
 	
 	public void decode()
 	{
-		return; // stub
+		return;// stub
+		
 	}
 	
-	
+	/*
+	*	readTree() - reads the code tree from the file
+	*	uses the bit reader to construct and return the tree
+	*/
+
 	public Node readTree()
 	{
-		return null; // stub
-	}
 		
-	
-	
-	
-
-	
-
-			
-	
-	
-	
-
+		return root; // stub
+	}
 	
 	
 	public class Node implements Comparable<Node>
