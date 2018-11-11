@@ -200,13 +200,33 @@ public class HEncode {
 
 	public void encodeFile()
 	{
+		FileInputStream inF;   // File object to read from.
+		int nextByte;          // Next byte from the file.
 		bitw = new BitWriter(inputFilename + ".huf");
 		// write the number of characters in the file
 		bitw.writeInt(root.frequency);
 		// write the tree to the file for decoding
 		writeTree(root);
 		// encode bytes
-		writeCode((byte)i);
+		try {
+		    inF = new FileInputStream(inputFilename);  // Open the input file.
+
+		    do {
+		    	nextByte = inF.read();    // Read the next byte (-1 on EOF)
+		    	if (nextByte != -1)       //
+		    		writeCode((byte)nextByte);;     //    write the byte to file
+		    } while (nextByte != -1);     //    for the byte.
+
+		    inF.close();                  //  Close the file.
+		}
+		catch (FileNotFoundException e) {
+			System.out.printf("Error opening file %s\n", inputFilename);
+			System.exit(0);
+		}
+		catch (IOException e) {
+			System.out.printf("IOException reading from: %s\n", inputFilename);
+			System.exit(0);
+		}
 		// close and pad
 		bitw.close();
 	}
@@ -224,7 +244,25 @@ public class HEncode {
 
 	public void writeCode(byte b)
 	{
-		return; // stub
+		// current node is the leaf node at that character
+		Node currentNode = leafPtr[b];
+		// while we aren't at the root
+		while(currentNode != root) {			
+			// push 0 onto stack if left child
+			if (currentNode.parent.lchild == currentNode) {
+				stk.push(0);
+			}
+			// push 1 onto stack if right child
+			if (currentNode.parent.rchild == currentNode) {
+				stk.push(1);
+			}
+			// move up the tree
+			currentNode = currentNode.parent;
+		}
+		// once at root clear stack and write bits
+		while (!stk.isEmpty()) {
+			bitw.writeBit(stk.pop());
+		}	
 	}
 
 
@@ -238,32 +276,23 @@ public class HEncode {
 
 	public void writeTree(Node root)
 	{
-		for (int i = 0; i < 256; i++) {
-			if (leafPtr[i] != null) {
-				Node currentNode = leafPtr[i];
-				// use parents to travel up the tree
-				while(currentNode != root) {
-					System.out.println("traveled up: " + currentNode.frequency + " char: " + currentNode.data);
-					
-					// push 0 onto stack if left child
-					if (currentNode.parent.lchild == currentNode) {
-						stk.push(0);
-					}
-					// push 1 onto stack if right child
-					if (currentNode.parent.rchild == currentNode) {
-						stk.push(1);
-					}
-					currentNode = currentNode.parent;
-				}
-				// once at root clear stack and write bits
-				while (!stk.isEmpty()) {
-					System.out.println("bit: " + stk.top());
-					bitw.writeBit(stk.pop());
-				}
-			}
+		// base case - we're done when we've reached the root
+		if (root == null) {
+			return;
 		}
-	}
+		// if leaf node  (no children) write 0 and char as byte
+		else if (root.rchild == null && root.lchild == null) {
+			bitw.writeBit(0);
+			bitw.writeByte(root.data);
+		}
+		// write left and
+		else {
+			bitw.writeBit(1);
+			writeTree(root.lchild);
+			writeTree(root.rchild);
+		}
 
+	}
 
 	/*
 	 *   printTree() - Print the Huffman Code Tree to
