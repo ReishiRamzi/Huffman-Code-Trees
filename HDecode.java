@@ -4,6 +4,8 @@
 
 import java.io.*;
 
+import org.graalvm.compiler.api.replacements.Snippet.NonNullParameter;
+
 public class HDecode {
 	
 	private Node root = null;      // Root of the Huffman Code Tree.
@@ -55,9 +57,24 @@ public class HDecode {
 	*	uses the bit reader to construct and return the tree
 	*/
 
-	public Node readTree()
+	public Node readTree(Node node)
 	{
-		return root; // stub
+		
+		if (bitr.readBit() == 0)
+		{
+			byte nextByte = bitr.nextByte();
+			Node nNode = new Node(nextByte);
+			return nNode;
+		}
+		else 
+		{
+			Node n = new Node();
+			n.lchild = readTree(n.lchild);
+			n.rchild = readTree(n.rchild);
+			n.lchild.parent = n;
+			n.rchild.parent = n;
+			return n;
+		}
 	}
 	
 	
