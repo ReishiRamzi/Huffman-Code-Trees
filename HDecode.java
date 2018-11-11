@@ -3,24 +3,24 @@
  */
 
 import java.io.*;
-import java.nio.file.Files;
 
 public class HDecode {
-	
-	private Node root = null;      // Root of the Huffman Code Tree.
-	
+	// Root of the Huffman Code Tree.
+	private Node root = null;
 	private String inputFilename;
-	private int fileSize;          // The number of bytes 
-	                               // in the original file.
-
+	// Declare the number of bytes in the original file
+	private int fileSize;
+	// Declare a BitReader read bits from the file
 	private BitReader bitr;
+	// Initialize an output file stream to write decoded file to
 	private FileOutputStream outF = null;
 	
 	public static void main(String[] args)
 			throws FileNotFoundException, IOException
 	{
-		HDecode decoder = new HDecode(args[0]);  // Construct a Huffman Decoder
-		
+		// Construct a Huffman Decoder
+		// from file name passed through command line
+		HDecode decoder = new HDecode(args[0]); 
 		// decode the contents
 		decoder.decode();
 	}
@@ -33,9 +33,9 @@ public class HDecode {
 	*/
 
 	public HDecode(String inputFilename)
-	{
+	{ 
+		// initialize global file name
 		this.inputFilename = inputFilename;
-	
 	}
 	
 	/*
@@ -46,63 +46,62 @@ public class HDecode {
 	
 	public void decode()
 	{
-
-		try {
+		// try / catch file read/write errors
+		try
+		{
+			// make a new output file stream
 			outF = new FileOutputStream(inputFilename + ".orig");
-			// read the first 4 bytes to get the file size
-
 			// construct our bit reader and output file
 			bitr = new BitReader(inputFilename);
+			// read first 4 bytes as int to get encoded size of file in characters
 			fileSize = bitr.readInt();
-			System.out.println(fileSize);
+			// Initialize the root of the tree with the following bits
 			root = readTree(bitr);	
-			printTree();
 
-			// declare a new node
+			// initialize a new node
 			Node currentNode = new Node();
-			
+			// declare the flag for finding a leaf node
 			boolean isleaf;
-
-				for (int i = 0; i < fileSize; i++) {
+			// loop through until all the characters have been decoded
+			for (int i = 0; i < fileSize; i++)
+			{
+				// start at the root
+				currentNode = root;
+				isleaf = false;
+				// no children means leaf has been reached
+				// use them to descend code tree until leaf is reached
+				while (!isleaf)
+				{
 					// read bits from the compressed file
-					
-					// start at the root
-					currentNode = root;
-					isleaf = false;
-					// no children means leaf has been reached
-					// use them to descend code tree until leaf is reached
-					while ( !isleaf ) {
-						int bit = bitr.readBit();
-						if (bit == -1) return;
-						System.out.println("bit:  " + bit + "\n");
+					int bit = bitr.readBit();
+					// if end of file, bit reader returns -1, escape
+					if (bit == -1) return;
 
-						// if it's a 0, move left	
-						if (bit == 0) {
-							currentNode = currentNode.lchild;
-						}
-						// if a 1, move right
-						else if (bit == 1)
-						{
-							currentNode = currentNode.rchild;
-						}
-						if (currentNode.lchild == null && currentNode.rchild == null)
-						{
-						
-						isleaf = true;
-						// once at the leaf, write data value in the leaf to output file
-						// to recreate the original file					
-						outF.write(currentNode.data);
-						System.out.println("current node data: " + currentNode.data);	
-						}
-						//bit = bitr.readBit();	
+					// if a 0, move down left	
+					if (bit == 0) {
+						currentNode = currentNode.lchild;
 					}
-
+					// if a 1, move down right
+					else if (bit == 1)
+					{
+						currentNode = currentNode.rchild;
+					}
+					// once at the leaf
+					if (currentNode.lchild == null && currentNode.rchild == null)
+					{
+					// set leaf flag to true to signal next bit is for the next character
+					isleaf = true;
+					// write data value in leaf to output file
+					outF.write(currentNode.data);
+					}
 				}
+			}
 			
 			// close the files
 			bitr.close();
 			outF.close();
 		}
+		// catch exceptions
 		catch (FileNotFoundException e) {
 			System.out.printf("Error opening file %s\n", inputFilename);
 			System.exit(0);
@@ -115,66 +114,49 @@ public class HDecode {
 	}
 	
 	/*
-	*	readTree() - reads the code tree from the file
+	*	readTree() - recursively reads the code tree from the file
 	*	uses the bit reader to construct and return the root of the tree
 	*/
 
 	public Node readTree(BitReader bitr)
 	{
+		// read the first bit
 		int bit = bitr.readBit();
+		// if a 0, we have a leaf
 		if (bit == 0)
-		{			
+		{
+			// Initialize a new node
 			Node nNode = new Node();
-			byte nextByte = (byte) bitr.readByte(); 
+			// store the following 8 bits as a byte
+			byte nextByte = (byte) bitr.readByte();
+			// store the byte as data on the node
 			nNode.data = nextByte;
+			// return the node
 			return nNode;
 		}
 		else 
 		{
+			// read the left tree
 			Node lTree = readTree(bitr);
+			// read the right tree
 			Node rTree = readTree(bitr);
+			// Initialize a new node
 			Node nNode = new Node();
+			// set its children
 			nNode.lchild = lTree;
 			nNode.rchild = rTree;
+			// set the new node as parent to the left and right trees
 			lTree.parent = nNode;
 			rTree.parent = nNode;
+			// return the node
 			return nNode;
 		}
 	}
 	
-		/*
-	 *   printTree() - Print the Huffman Code Tree to
-	 *                 standard output.
-	 */
-
-
-	public void printTree()
-	{
-		rPrintTree(root,0);
-	}
-
-	/*
-	 *    rPrintTree() - the usual quick recursive method to print a tree.
-	 */
-
-	public void rPrintTree(Node r, int level)
-	{
-
-		if (r == null)          // Empty tree.
-			return;
-
-		rPrintTree(r.rchild, level + 1);   // Print the right subtree.
-
-		for (int i = 0; i < level; i++)
-			System.out.print("         ");
-
-		if (r.data > (byte) 31)
-			System.out.printf("%c-%d\n", (char) r.data, r.frequency);
-		else
-			System.out.printf("%c-%d\n", '*', r.frequency);
-
-		rPrintTree(r.lchild, level + 1);
-	}
+	 /*
+     *    Node - an inner class to represent a node of
+     *           a Huffman Code Tree.
+     */
 	
 	public class Node implements Comparable<Node>
 	{
