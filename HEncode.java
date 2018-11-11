@@ -285,7 +285,7 @@ public class HEncode {
 			bitw.writeBit(0);
 			bitw.writeByte(root.data);
 		}
-		// write left and
+		// write left and right trees
 		else {
 			bitw.writeBit(1);
 			writeTree(root.lchild);
