@@ -61,11 +61,11 @@ public class HDecode {
 			fileSize = bitr.readInt();
 			// Initialize the root of the tree with the following bits
 			root = readTree(bitr);	
-
 			// initialize a new node
 			Node currentNode = new Node();
 			// declare the flag for finding a leaf node
 			boolean isleaf;
+
 			// loop through until all the characters have been decoded
 			for (int i = 0; i < fileSize; i++)
 			{
