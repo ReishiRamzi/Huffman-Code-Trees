@@ -146,7 +146,9 @@ public class HEncode {
 			if (freq[i] > 0) {
 				// initialize a new node
 				leafPtr[i] = new Node();
+				// assign the position from 0 - 255, ascii character encoding, as the leaf's data
 				leafPtr[i].data = (byte) i;
+				// assign frequency as the number of times that character appears
 				leafPtr[i].frequency = freq[i];
 				// enqueue the node on the priority queue
 				pq.enqueue(leafPtr[i]);
@@ -185,9 +187,7 @@ public class HEncode {
 
 			// throw the new node back in the priority queue
 			pq.enqueue(nNode);
-
 		}
-
 	}
 
 	/*
@@ -393,7 +393,7 @@ public class HEncode {
 			String str = "byte: " + data + "  char: ";
 
 			if (data > (byte) 31)
-				str = str + (char) data + "  freq: " + frequency;
+				str = str + ch + "  freq: " + frequency;
 			else
 				str = str + " " + "  freq: " + frequency;
 

@@ -49,8 +49,12 @@ public class HDecode {
 		// try / catch file read/write errors
 		try
 		{
+			// split the file name on period
+			String[] newFileNameArr =  inputFilename.split("\\.");
+			// take the first two parts (filename and file type) and append .orig
+			String newFileName = newFileNameArr[0] + "." + newFileNameArr[1] + ".orig";
 			// make a new output file stream
-			outF = new FileOutputStream(inputFilename + ".orig");
+			outF = new FileOutputStream(newFileName);
 			// construct our bit reader and output file
 			bitr = new BitReader(inputFilename);
 			// read first 4 bytes as int to get encoded size of file in characters
@@ -128,7 +132,7 @@ public class HDecode {
 			// Initialize a new node
 			Node nNode = new Node();
 			// store the following 8 bits as a byte
-			byte nextByte = (byte) bitr.readByte();
+			byte nextByte = bitr.readByte();
 			// store the byte as data on the node
 			nNode.data = nextByte;
 			// return the node
